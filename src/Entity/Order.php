@@ -63,6 +63,18 @@ class Order
      */
     private $email;
 
+    /**
+     * @ORM\OneToOne(targetEntity=DeliveryOrder::class, cascade={"persist", "remove"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $DeliveryOrder;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Product::class, inversedBy="orders")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $product;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -172,6 +184,30 @@ class Order
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getDeliveryOrder(): ?DeliveryOrder
+    {
+        return $this->DeliveryOrder;
+    }
+
+    public function setDeliveryOrder(DeliveryOrder $DeliveryOrder): self
+    {
+        $this->DeliveryOrder = $DeliveryOrder;
+
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): self
+    {
+        $this->product = $product;
 
         return $this;
     }

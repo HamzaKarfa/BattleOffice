@@ -45,6 +45,7 @@ class LandingPageController extends AbstractController
             $product = $this->getDoctrine()
                             ->getRepository(Product::class)
                             ->findOneBy(array( 'id' => intval($form['product']->getData()->getName())));
+                            $allForm['order']->setDeliveryOrder($allForm['deliveryOrder']);
             dd($product, $allForm);
             // $entityManager = $this->getDoctrine()->getManager();
             // $entityManager->persist($order);
