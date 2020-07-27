@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit DeliveryOrder{% endblock %}
+
+{% block body %}
+    <h1>Edit DeliveryOrder</h1>
+
+    {{ include('delivery_order/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('delivery_order_index') }}">back to list</a>
+
+    {{ include('delivery_order/_delete_form.html.twig') }}
+{% endblock %}
