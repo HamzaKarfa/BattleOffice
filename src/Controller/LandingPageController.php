@@ -13,7 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpClient\HttpClient;
-use Curl\Curl;
+use Symfony\Component\HttpClient\CurlHttpClient;
+
 class LandingPageController extends AbstractController
 {
     /**
@@ -52,63 +53,106 @@ class LandingPageController extends AbstractController
             // $entityManager = $this->getDoctrine()->getManager();
             // $entityManager->persist($allForm['order']);
             // $entityManager->flush();
-
+            $array = [
+                'order' => [
+                    'id' => $allForm['order']->getProduct()->getId(),
+                    'product' => $allForm['order']->getProduct()->getName(),
+                    "payment_method"=> "card",
+                    "status"=> "WAITING",
+                    "client"=> [
+                        "firstname"=> $allForm['order']->getFirstname(),
+                        "lastname"=> $allForm['order']->getLastname(),
+                        "email" => $allForm['order']->getEmail()
+                    ],
+                    "addresses"=> [
+                        "billing"=> [
+                          "address_line1"=> $allForm['order']->getAdress(),
+                          "address_line2"=> $allForm['order']->getAdressComplement(),
+                          "city"=> $allForm['order']->getCity(),
+                          "zipcode"=> strval($allForm['order']->getZipCode()),
+                          "country"=> $allForm['order']->getCountry(),
+                          "phone"=> $allForm['order']->getPhoneNumber()
+                        ],
+                        "shipping"=> [
+                            "address_line1"=> $allForm['order']->getDeliveryOrder()->getAdress(),
+                            "address_line2"=> $allForm['order']->getDeliveryOrder()->getAdressComplement(),
+                            "city"=> $allForm['order']->getDeliveryOrder()->getCity(),
+                            "zipcode"=>  strval ($allForm['order']->getDeliveryOrder()->getZipCode()),
+                            "country"=> $allForm['order']->getDeliveryOrder()->getCountry(),
+                            "phone"=> $allForm['order']->getDeliveryOrder()->getPhoneNumber()
+                        ]
+                    ],
+                ],
+            ];
+            $json = json_encode($array);
+            dd($json);
             //Contact à l'API
-            $url = 'http://api-commerce.simplon-roanne.com/order';
-              $httpClient = HttpClient::create();
-              $response = $httpClient->request('POST', $url,[
-                'verify_peer' => 'false'
-                    // 'json' => json_encode($allForm['order'])
-                  ]);
-                   dd($response->getStatusCode());
+            $url = 'https://api-commerce.simplon-roanne.com/order';
+            try {
+                // $httpClient = new CurlHttpClient();
+                $httpClient = HttpClient::create();
 
+                $response = $httpClient->request( 'POST' , $url, [
+                        'headers' => [
+                            'accept' => 'application/json',
+                            // ,
+                            'Authorization' => 'Bearer mJxTXVXMfRzLg6ZdhUhM4F6Eutcm1ZiPk4fNmvBMxyNR4ciRsc8v0hOmlzA0vTaX',
+                            'Content-Type' => 'application/json',
+                        ],
+                        'body' => '{
+                            "order": {
+                              "id": 1,
+                              "product": "Nerf Elite Jolt",
+                              "payment_method": "paypal",
+                              "status": "WAITING",
+                              "client": {
+                                "firstname": "François",
+                                "lastname": "Dupont",
+                                "email": "francois.dupont@gmail.com"
+                              },
+                              "addresses": {
+                                "billing": {
+                                  "address_line1": "1, rue du test",
+                                  "address_line2": "3ème étage",
+                                  "city": "Lyon",
+                                  "zipcode": "69000",
+                                  "country": "France",
+                                  "phone": "string"
+                                },
+                                "shipping": {
+                                  "address_line1": "1, rue du test",
+                                  "address_line2": "3ème étage",
+                                  "city": "Lyon",
+                                  "zipcode": "69000",
+                                  "country": "France",
+                                  "phone": "string"
+                                }
+                              }
+                            }
+                          }'
+                ]);
 
-
-            $curl = new Curl();
-            $curl->post($url, array(
-                    'json' => json_encode($allForm['order'])
-            ));
-            // $statusCode = $response->getInfo();
-            // // $statusCode = 200
-            // $contentType = $response->getHeaders()['content-type'][0];
-            // // $contentType = 'application/json'
-            // $content = $response->getContent();
-            // // $content = '{"id":521583, "name":"symfony-docs", ...}'
-            // $content = $response->toArray();
-            if ($curl->error) {
-                dd( $curl->error_code);
+                $statusCode = $response->getStatusCode();
+                // $statusCode = 200
+                $contentType = $response->getHeaders()['content-type'][0];
+                // $contentType = 'application/json'
+                $content = $response->getContent();
+                // $content = '{"id":521583, "name":"symfony-docs", ...}'
+                // $content = $response->toArray();
+                dd($statusCode, $content, $response);
+            } catch (\Exception $e) {
+               dd($e);
             }
-            else {
-                dd( $curl->response);
-            }
-    
+            
 
-            return $this->redirectToRoute('payement');
+            return $this->redirectToRoute('');
         }
 
         return $this->render('landing_page/index_new.html.twig', [
             'form' => $form->createView(),
         ]);
     }
-     /**
-     * @Route("/confirmation", name="payement")
-     */
-    public function payement(Request $request)
-    {
-        //FORM STRIPE PAYEMENT 
 
-        $form->handleRequest($request);
-        
-        if ($form->isSubmitted() && $form->isValid()) {
-
-
-
-            // //Stripe 
-            // $this->stripeProcessing($payment, $request);
-
-            return $this->redirectToRoute('payement');
-        }
-    }
     /**
      * @Route("/confirmation", name="confirmation")
      */
