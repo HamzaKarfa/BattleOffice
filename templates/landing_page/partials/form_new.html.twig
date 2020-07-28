@@ -38,7 +38,10 @@
                 <div class="collapsible-body card-form">
                     <div class="row">
                         <div class="center-align">
-                        <button class="btn">{{ button_label|default('Save') }}</button> 
+
+                            
+                        
+                            <button class="btn" name="payment" value="stripe">{{ button_label|default('Save')  }}</button> 
 
                             {# <button type="submit" name="order[payment_method]" value="lpmonetico" class="btn-large btn-block waves-effect waves-light">Continuer</button> #}
                             <p>J'accepte les <a href="https://feelwellshop.com/fr/conditions-generales-de-ventes" target="_blank">conditions générales de vente</a></p>
@@ -52,7 +55,10 @@
                 <div class="collapsible-body">
                     <div class="row">
                         <div class="center-align">
-                            <button type="submit" name="order[payment_method]" value="lppaypal" class="btn-large btn-block waves-effect waves-light">Continuer sur PayPal</button>
+
+                            <button class="btn" name="payment" value="paypal">{{ button_label|default('Save') }}</button> 
+
+                            {# <button type="submit" name="order[payment_method]" value="lppaypal" class="btn-large btn-block waves-effect waves-light">Continuer sur PayPal</button> #}
                             <p>J'accepte les <a href="https://feelwellshop.com/fr/conditions-generales-de-ventes" target="_blank">conditions générales de vente</a></p>
                         </div>
                     </div>

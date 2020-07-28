@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Order;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -28,6 +29,7 @@ class OrderType extends AbstractType
             ])
             ->add('phone_number')
             ->add('email')
+            ->add('methodPayment', HiddenType::class)
         ;
     }
 

@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Entity;
-
 use App\Repository\OrderRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -74,6 +73,16 @@ class Order
      * @ORM\JoinColumn(nullable=false)
      */
     private $product;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true )
+     */
+    private $statusPayment = "WAITING";
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $methodPayment;
 
     public function getId(): ?int
     {
@@ -208,6 +217,30 @@ class Order
     public function setProduct(?Product $product): self
     {
         $this->product = $product;
+
+        return $this;
+    }
+
+    public function getStatusPayment(): ?string
+    {
+        return $this->statusPayment;
+    }
+
+    public function setStatusPayment(string $statusPayment): self
+    {
+        $this->statusPayment = $statusPayment;
+
+        return $this;
+    }
+
+    public function getMethodPayment(): ?string
+    {
+        return $this->methodPayment;
+    }
+
+    public function setMethodPayment(string $methodPayment): self
+    {
+        $this->methodPayment = $methodPayment;
 
         return $this;
     }

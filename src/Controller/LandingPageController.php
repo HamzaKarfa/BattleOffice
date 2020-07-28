@@ -9,11 +9,13 @@ use App\Form\DeliveryOrderType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Form\OrderType;
 use App\Form\ProductType;
+use App\Repository\OrderRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\CurlHttpClient;
+
 
 class LandingPageController extends AbstractController
 {
@@ -21,7 +23,7 @@ class LandingPageController extends AbstractController
      * @Route("/", name="landing_page")
      * @throws \Exception
      */
-    public function index(Request $request)
+    public function index(Request $request, OrderRepository $orderRepository)
     {
         //Your code here
         $allForm = [
@@ -49,43 +51,50 @@ class LandingPageController extends AbstractController
             if ($allForm['deliveryOrder']->getFirstname() === null) {
                 $this->setDeliveryOrder($allForm['order'], $allForm['deliveryOrder']);
             }
-            // dd($product, $allForm);
+            
+            $allForm['order']->setMethodPayment($request->request->get('payment'));
             // $entityManager = $this->getDoctrine()->getManager();
             // $entityManager->persist($allForm['order']);
             // $entityManager->flush();
+            
+            
+            $order =  $orderRepository->getOrder($allForm['order']->getEmail());
+
+
+            //  dd($product, $order, $request->request);
             $array = [
                 'order' => [
-                    'id' => $allForm['order']->getProduct()->getId(),
-                    'product' => $allForm['order']->getProduct()->getName(),
-                    "payment_method"=> "card",
-                    "status"=> "WAITING",
-                    "client"=> [
-                        "firstname"=> $allForm['order']->getFirstname(),
-                        "lastname"=> $allForm['order']->getLastname(),
-                        "email" => $allForm['order']->getEmail()
+                    'id' => $order[0]->getProduct()->getId(),
+                    'product' => $order[0]->getProduct()->getName(),
+                    "payment_method"=> $order[0]->getMethodPayment(),
+                    "status" => "WAITING",
+                    "client" => [
+                        "firstname"=> $order[0]->getFirstname(),
+                        "lastname"=> $order[0]->getLastname(),
+                        "email" => $order[0]->getEmail(),
                     ],
-                    "addresses"=> [
-                        "billing"=> [
-                          "address_line1"=> $allForm['order']->getAdress(),
-                          "address_line2"=> $allForm['order']->getAdressComplement(),
-                          "city"=> $allForm['order']->getCity(),
-                          "zipcode"=> strval($allForm['order']->getZipCode()),
-                          "country"=> $allForm['order']->getCountry(),
-                          "phone"=> $allForm['order']->getPhoneNumber()
+                    "addresses" => [
+                        "billing" => [
+                          "address_line1"=> $order[0]->getAdress(),
+                          "address_line2"=> $order[0]->getAdressComplement(),
+                          "city"=> $order[0]->getCity(),
+                          "zipcode"=> strval($order[0]->getZipCode()),
+                          "country"=> $order[0]->getCountry(),
+                          "phone"=> $order[0]->getPhoneNumber(),
                         ],
-                        "shipping"=> [
-                            "address_line1"=> $allForm['order']->getDeliveryOrder()->getAdress(),
-                            "address_line2"=> $allForm['order']->getDeliveryOrder()->getAdressComplement(),
-                            "city"=> $allForm['order']->getDeliveryOrder()->getCity(),
-                            "zipcode"=>  strval ($allForm['order']->getDeliveryOrder()->getZipCode()),
-                            "country"=> $allForm['order']->getDeliveryOrder()->getCountry(),
-                            "phone"=> $allForm['order']->getDeliveryOrder()->getPhoneNumber()
+                        "shipping" => [
+                            "address_line1"=> $order[0]->getDeliveryOrder()->getAdress(),
+                            "address_line2"=> $order[0]->getDeliveryOrder()->getAdressComplement(),
+                            "city"=> $order[0]->getDeliveryOrder()->getCity(),
+                            "zipcode"=>  strval ($order[0]->getDeliveryOrder()->getZipCode()),
+                            "country"=> $order[0]->getDeliveryOrder()->getCountry(),
+                            "phone"=> $order[0]->getDeliveryOrder()->getPhoneNumber(),
                         ]
-                    ],
-                ],
+                    ]
+                ]
             ];
             $json = json_encode($array);
-            dd($json);
+             dd($json);
             //Contact à l'API
             $url = 'https://api-commerce.simplon-roanne.com/order';
             try {
@@ -95,41 +104,10 @@ class LandingPageController extends AbstractController
                 $response = $httpClient->request( 'POST' , $url, [
                         'headers' => [
                             'accept' => 'application/json',
-                            // ,
                             'Authorization' => 'Bearer mJxTXVXMfRzLg6ZdhUhM4F6Eutcm1ZiPk4fNmvBMxyNR4ciRsc8v0hOmlzA0vTaX',
                             'Content-Type' => 'application/json',
                         ],
-                        'body' => '{
-                            "order": {
-                              "id": 1,
-                              "product": "Nerf Elite Jolt",
-                              "payment_method": "paypal",
-                              "status": "WAITING",
-                              "client": {
-                                "firstname": "François",
-                                "lastname": "Dupont",
-                                "email": "francois.dupont@gmail.com"
-                              },
-                              "addresses": {
-                                "billing": {
-                                  "address_line1": "1, rue du test",
-                                  "address_line2": "3ème étage",
-                                  "city": "Lyon",
-                                  "zipcode": "69000",
-                                  "country": "France",
-                                  "phone": "string"
-                                },
-                                "shipping": {
-                                  "address_line1": "1, rue du test",
-                                  "address_line2": "3ème étage",
-                                  "city": "Lyon",
-                                  "zipcode": "69000",
-                                  "country": "France",
-                                  "phone": "string"
-                                }
-                              }
-                            }
-                          }'
+                        'body' => $json
                 ]);
 
                 $statusCode = $response->getStatusCode();
@@ -138,7 +116,7 @@ class LandingPageController extends AbstractController
                 // $contentType = 'application/json'
                 $content = $response->getContent();
                 // $content = '{"id":521583, "name":"symfony-docs", ...}'
-                // $content = $response->toArray();
+                 $content = $response->toArray();
                 dd($statusCode, $content, $response);
             } catch (\Exception $e) {
                dd($e);
