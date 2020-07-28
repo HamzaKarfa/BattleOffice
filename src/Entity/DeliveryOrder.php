@@ -33,14 +33,14 @@ class DeliveryOrder
     private $adress;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $adress_complement;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $city;
+    private $city; 
 
     /**
      * @ORM\Column(type="integer")
