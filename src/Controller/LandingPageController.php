@@ -13,11 +13,17 @@ use App\Form\PaymentType;
 use App\Form\ProductType;
 use App\Repository\OrderRepository;
 use Stripe\Stripe;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\CurlHttpClient;
+
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+
+
 
 
 class LandingPageController extends AbstractController
@@ -136,7 +142,7 @@ class LandingPageController extends AbstractController
     /**
      * @Route("/payment/{id}/{order_id}", name="payment")
      */
-    public function payment(Order $order, $order_id, Request $request,OrderRepository $orderRepository)
+    public function payment(Order $order, $order_id, Request $request,OrderRepository $orderRepository,MailerInterface $mailer)
     {
 
         $fullOrder  = $orderRepository->getOrder($order->getEmail());
@@ -152,9 +158,10 @@ class LandingPageController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($payment);
             $entityManager->flush();
-            
+
             $this->stripeProcessing($order);
             $this->APIUpdateOrder($order_id);
+            $this->sendEmail($mailer , $order);
 
 
             return $this->redirectToRoute('confirmation');
@@ -250,5 +257,34 @@ class LandingPageController extends AbstractController
          }
 
     }
+ /**
+     * @Route("/email")
+     */
+    public function sendEmail(MailerInterface $mailer, Order $order )
+    {
+        $email = (new TemplatedEmail())
+                    ->from(new Address('Hamza.karfa@gmail.com', 'Hamza Mail Bot'))
+                    ->to('Hamza.karfa@gmail.com')
+                    ->subject('Please Confirm your Email')
+                    ->htmlTemplate('emails/confirmation.html.twig')
+                    ->context([
+                        'name' => $order->getFirstname(),
+                        'product' => $order->getProduct()
+                    ]);
+                    // ->html('<p>See Twig integration for better HTML integration!</p>');
+        // $email = (new Email())
+        //     ->from('hello@example.com')
+        //     ->to('hamza.karfa@gmail.com')
+        //     //->cc('cc@example.com')
+        //     //->bcc('bcc@example.com')
+        //     //->replyTo('fabien@example.com')
+        //     ->priority(Email::PRIORITY_HIGH)
+        //     ->subject('Time for Symfony Mailer!')
+        //     ->text('Sending emails is fun again!')
+        //     ->html('<p>See Twig integration for better HTML integration!</p>');
 
+        $mailer->send($email);
+
+        // ...
+    }
 }
