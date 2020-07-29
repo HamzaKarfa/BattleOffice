@@ -1,0 +1,22 @@
+{{ form_start(form ,{ 'attr' : {   'method' : 'post', 'id' : 'payment-form'}}) }}
+    {{ form_widget(form) }}
+
+
+        {#  PAIMENT FORM #}
+    
+
+    <div class="input-field col s12">
+        <h5 class="center">Payment</h5>
+        <div class="form-row">
+            <label for="card-element">
+            Credit or debit card
+            </label> 
+            <div id="card-element">
+            <!-- A Stripe Element will be inserted here. -->
+            
+            </div>
+            <div id="card-errors" role="alert"></div>
+        </div>
+    </div>
+    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_end(form) }}

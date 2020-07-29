@@ -4,12 +4,15 @@ namespace App\Controller;
 
 use App\Entity\DeliveryOrder;
 use App\Entity\Order;
+use App\Entity\Payment;
 use App\Entity\Product;
 use App\Form\DeliveryOrderType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Form\OrderType;
+use App\Form\PaymentType;
 use App\Form\ProductType;
 use App\Repository\OrderRepository;
+use Stripe\Stripe;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,7 +28,6 @@ class LandingPageController extends AbstractController
      */
     public function index(Request $request, OrderRepository $orderRepository)
     {
-        //Your code here
         $allForm = [
             'product',
             'order' => new Order(),
@@ -33,35 +35,34 @@ class LandingPageController extends AbstractController
         ];
         
         $form = $this->createFormBuilder($allForm)
-                    ->add('product', ProductType::class)
-                    ->add('order', OrderType::class)
-                    ->add('deliveryOrder', DeliveryOrderType::class)
-        ->getForm();
+                     ->add('product', ProductType::class)
+                     ->add('order', OrderType::class)
+                     ->add('deliveryOrder', DeliveryOrderType::class)
+                     ->getForm();
         
         $form->handleRequest($request);
         
-        
         if ($form->isSubmitted() && $form->isValid()) {
+
             $product = $this->getDoctrine()
                             ->getRepository(Product::class)
                             ->findOneBy(array( 'id' => intval($form['product']->getData()->getName())));
-                            $allForm['order']->setDeliveryOrder($allForm['deliveryOrder']);
-                            $allForm['order']->setProduct($product);
+
+            $allForm['order']->setDeliveryOrder($allForm['deliveryOrder']);
+            $allForm['order']->setProduct($product);
 
             if ($allForm['deliveryOrder']->getFirstname() === null) {
                 $this->setDeliveryOrder($allForm['order'], $allForm['deliveryOrder']);
             }
             
             $allForm['order']->setMethodPayment($request->request->get('payment'));
-            // $entityManager = $this->getDoctrine()->getManager();
-            // $entityManager->persist($allForm['order']);
-            // $entityManager->flush();
             
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($allForm['order']);
+            $entityManager->flush();
             
             $order =  $orderRepository->getOrder($allForm['order']->getEmail());
 
-
-            //  dd($product, $order, $request->request);
             $array = [
                 'order' => [
                     'id' => $order[0]->getProduct()->getId(),
@@ -94,38 +95,14 @@ class LandingPageController extends AbstractController
                 ]
             ];
             $json = json_encode($array);
-             dd($json);
-            //Contact à l'API
-            $url = 'https://api-commerce.simplon-roanne.com/order';
-            try {
-                // $httpClient = new CurlHttpClient();
-                $httpClient = HttpClient::create();
 
-                $response = $httpClient->request( 'POST' , $url, [
-                        'headers' => [
-                            'accept' => 'application/json',
-                            'Authorization' => 'Bearer mJxTXVXMfRzLg6ZdhUhM4F6Eutcm1ZiPk4fNmvBMxyNR4ciRsc8v0hOmlzA0vTaX',
-                            'Content-Type' => 'application/json',
-                        ],
-                        'body' => $json
-                ]);
+               $test = $this->APICreateOrder($json);
 
-                $statusCode = $response->getStatusCode();
-                // $statusCode = 200
-                $contentType = $response->getHeaders()['content-type'][0];
-                // $contentType = 'application/json'
-                $content = $response->getContent();
-                // $content = '{"id":521583, "name":"symfony-docs", ...}'
-                 $content = $response->toArray();
-                dd($statusCode, $content, $response);
-            } catch (\Exception $e) {
-               dd($e);
-            }
-            
-
-            return $this->redirectToRoute('');
+            return $this->redirectToRoute('payment',[
+                'id' => $order[0]->getId(),
+                'order_id' => $test['order_id']
+            ]);
         }
-
         return $this->render('landing_page/index_new.html.twig', [
             'form' => $form->createView(),
         ]);
@@ -156,23 +133,122 @@ class LandingPageController extends AbstractController
         $deliveryOrder->setPhoneNumber($order->getPhoneNumber());
     }
 
-    // //stripe payement 
-    // public function stripeProcessing($payment, $request)
-    // {
-    //     try{
-    //         \Stripe\Stripe::setApiKey('sk_test_51H1pgUELWEJ2P8yhcW3i8WyQdJFlx0HeBo4FS5AZcotnzcAR9VJV1PBLV870yK8GvgetgqopG1FKeo7Ei8lbOQA900S8TFpHi5');
+    /**
+     * @Route("/payment/{id}/{order_id}", name="payment")
+     */
+    public function payment(Order $order, $order_id, Request $request,OrderRepository $orderRepository)
+    {
+
+        $fullOrder  = $orderRepository->getOrder($order->getEmail());
+        $order = $fullOrder[0];
+        $payment = new Payment();
+        
+        $form = $this->createForm(PaymentType::class, $payment);
+        
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $payment->setClient($order);
+            
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($payment);
+            $entityManager->flush();
+            
+            $this->stripeProcessing($order);
+            $this->APIUpdateOrder($order_id);
 
 
-    //         $charge = \Stripe\PaymentIntent::create([
-    //             'amount' => $payment->getAmount()*100,
-    //             'currency' => 'eur',
-    //             // Verify your integration in this guide by including this parameter
-    //             'metadata' => ['integration_check' => 'accept_a_payment'],
-    //         ]);
-    //         echo 'Merci pour votre participation';
-    //     }
-    //     catch(\Exception $e){
-    //         dd('erreur payment',$e,$e->getMessage());
-    //     }
-    // }
+            return $this->redirectToRoute('confirmation');
+        }
+
+
+        return $this->render('landing_page/payment.html.twig', [
+                    'form' => $form->createView(),
+                    'order' => $order,
+                    'amount' => floatval($order->getProduct()->getPrice())
+            ]);
+    }
+    public function stripeProcessing($order)
+    {
+        try{
+                
+            Stripe::setApiKey('sk_test_51H1pgUELWEJ2P8yhcW3i8WyQdJFlx0HeBo4FS5AZcotnzcAR9VJV1PBLV870yK8GvgetgqopG1FKeo7Ei8lbOQA900S8TFpHi5');
+
+            $charge = \Stripe\PaymentIntent::create([
+                'amount' => floatval($order->getProduct()->getPrice())*100,
+                'currency' => 'eur',
+                // Verify your integration in this guide by including this parameter
+                'metadata' => ['integration_check' => 'accept_a_payment'],
+            ]);
+            echo 'Merci pour votre participation';
+            $order->setStatusPayment('PAID');
+      
+        }
+        catch(\Exception $e){
+            dd('erreur payment',$e,$e->getMessage());
+        }
+    }
+    public function APICreateOrder($json)
+    {
+
+        $url = 'https://api-commerce.simplon-roanne.com/order';
+         try {
+             // $httpClient = new CurlHttpClient();
+             $httpClient = HttpClient::create();
+    
+             $response = $httpClient->request( 'POST' , $url, [
+                     'headers' => [
+                         'accept' => 'application/json',
+                         'Authorization' => 'Bearer mJxTXVXMfRzLg6ZdhUhM4F6Eutcm1ZiPk4fNmvBMxyNR4ciRsc8v0hOmlzA0vTaX',
+                         'Content-Type' => 'application/json',
+                     ],
+                     'body' => $json
+             ]);
+    
+             $statusCode = $response->getStatusCode();
+             // $statusCode = 200
+             $contentType = $response->getHeaders()['content-type'][0];
+             // $contentType = 'application/json'
+             $content = $response->getContent();
+             // $content = '{"id":521583, "name":"symfony-docs", ...}'
+              $content = $response->toArray();
+            
+              return $content;
+
+         } catch (\Exception $e) {
+            dd($e);
+         }
+    }
+    public function APIUpdateOrder($orderId)
+    {
+        $arrayStatus = [
+            'status' => 'PAID'
+        ];
+
+        $url = 'https://api-commerce.simplon-roanne.com/order/'.$orderId.'/status';
+         try {
+             // $httpClient = new CurlHttpClient();
+             $httpClient = HttpClient::create();
+    
+             $response = $httpClient->request( 'POST' , $url, [
+                     'headers' => [
+                         'accept' => 'application/json',
+                         'Authorization' => 'Bearer mJxTXVXMfRzLg6ZdhUhM4F6Eutcm1ZiPk4fNmvBMxyNR4ciRsc8v0hOmlzA0vTaX',
+                         'Content-Type' => 'application/json',
+                     ],
+                     'body' => json_encode($arrayStatus)
+             ]);
+    
+             $statusCode = $response->getStatusCode();
+             // $statusCode = 200
+             $contentType = $response->getHeaders()['content-type'][0];
+             // $contentType = 'application/json'
+             $content = $response->getContent();
+             // $content = '{"id":521583, "name":"symfony-docs", ...}'
+              $content = $response->toArray();
+         } catch (\Exception $e) {
+            dd($e);
+         }
+
+    }
+
 }

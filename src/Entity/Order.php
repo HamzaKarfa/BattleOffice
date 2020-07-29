@@ -84,6 +84,11 @@ class Order
      */
     private $methodPayment;
 
+    /**
+     * @ORM\OneToOne(targetEntity=Payment::class, mappedBy="client", cascade={"persist", "remove"})
+     */
+    private $payment;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -241,6 +246,23 @@ class Order
     public function setMethodPayment(string $methodPayment): self
     {
         $this->methodPayment = $methodPayment;
+
+        return $this;
+    }
+
+    public function getPayment(): ?Payment
+    {
+        return $this->payment;
+    }
+
+    public function setPayment(Payment $payment): self
+    {
+        $this->payment = $payment;
+
+        // set the owning side of the relation if necessary
+        if ($payment->getClient() !== $this) {
+            $payment->setClient($this);
+        }
 
         return $this;
     }

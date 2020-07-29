@@ -27,11 +27,14 @@ class OrderRepository extends ServiceEntityRepository
         $query = $entityManager->createQuery(
             'SELECT DISTINCT 
                 theOrder,
-                delivery_order
+                delivery_order,
+                products
             FROM 
                 App\Entity\Order theOrder
             JOIN
             theOrder.DeliveryOrder delivery_order
+            JOIN
+            theOrder.product products
             WHERE
             theOrder.email = :email
             '
