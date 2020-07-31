@@ -3,6 +3,8 @@
 namespace App\Form;
 
 use App\Entity\Order;
+use App\Entity\Product;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -29,6 +31,12 @@ class OrderType extends AbstractType
             ])
             ->add('phone_number')
             ->add('email')
+            ->add('product', EntityType::class,[
+                'class' => Product::class,
+                'expanded' => true,
+                'multiple' => false,
+                'choice_value' => 'id',
+            ])
             ->add('methodPayment', HiddenType::class)
         ;
     }

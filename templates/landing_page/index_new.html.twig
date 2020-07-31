@@ -38,81 +38,53 @@
                                 <p class="h6 center-align">Choisissez votre produit</p>
                             </div>
                         </div>
+                        <div style='color:red'>
+                            {{ form_errors(form.order.product)}}
+                        </div>
+                        {{ form_label(form.order.product)}}
+                        {# {{ (form.order.product.vars.choices)}} #}
+                        {# {{dump(form_widget(form.product.name))}} #}
+                        {% for key, item in form.order.product.vars.choices %}
+                       {# {{ form_widget(item.label) }} #}
 
                         <label class="cure-radio">
-                            {{ form_widget(form.product.name[0]) }}
-
-                            {# <input name="order[cart][cart_products][0]"  type="radio"> #}
+                        <input type='radio' id="form_order_product_{{ item.data.id }}" name="form[order][product]" value='{{item.data.id}}'>
                             <article>
+
                                 <div class="card center-align">
                                     <div class="row">
                                         <div class="col s12 m12 l4">
-                                            <div class="image-content">
-                                                <img src="assets/images/nerf1.jpg" alt="10 Nerf Elite Jolt© + 2 offerts" class="responsive-img">
-                                            </div>
-                                        </div>
-                                        <div class="col s12 m6 l4">
-                                            <div class="card-content">
-                                                <p class="h6">
-                                                    10 Nerf© Elite Jolt
-                                                </p>
-                                                <p class="h5 color_brand_secondary">
-                                                    + 4 OFFERTS
-                                                </p>
-                                                <p class="h4">
-                                                    64,90€
-                                                    <span class="h6"><br>au lieu de <del class="h5 color_brand_secondary">94,90€</del></span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="col s12 m6 l4">
-                                            <div class="card-content">
-                                                <p class="h6 color_brand_secondary">
-                                                    J'économise 30€
-                                                </p>
-                                                <p class="h6">
-                                                    + livraison gratuite
-                                                </p>
-                                                <div class="picto-wrapper">
-                                                    <img src="assets/images/like-product.png" class="responsive-img" alt="Garantie satisfait ou remboursé">
-                                                    <p class="color_brand_primary">Satisfait<br>ou remboursé</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </article>
-                        </label>
-                        <label class="cure-radio">
-                            {{ form_widget(form.product.name[1]) }}
-                            {# <input name="order[cart][cart_products][0]" value="3" type="radio" checked="checked"> #}
-                            <article>
-                                <div class="card center-align">
-                                    <div class="row">
-                                        <div class="col s12 m12 l4">
+                                        {% if item.data.isPopulaire %}
                                             <div class="promo">Offre la plus populaire !</div>
+                                        {% endif %}
+                                        
+
                                             <div class="image-content">
-                                                <img src="assets/images/nerf2.jpg" alt="14 Nerf© Elite Disruptor + 2 offerts" class="responsive-img">
+                                                <img src="assets/images/{{item.data.image}}" alt="{{item.data.name}}" class="responsive-img">
                                             </div>
                                         </div>
                                         <div class="col s12 m6 l4">
                                             <div class="card-content">
                                                 <p class="h6">
-                                                    4 Nerf© Elite Disruptor
+                                                    {{item.data.numberOfProduct}}  {{item.data.name}}
                                                 </p>
+                                                {% if item.data.numberOffrer != 0 %}
                                                 <p class="h5 color_brand_secondary">
-                                                    + 2 OFFERTS
+                                                    + {{item.data.numberOffrer}} OFFERTS
                                                 </p>
+                                                {% endif %}
+                                                
                                                 <p class="h4">
-                                                    51,90€
-                                                    <span class="h6"><br>au lieu de <del class="h5 color_brand_secondary">79,90€</del></span>
+                                                    {{(item.data.price /100)|number_format(2, '.', ',')}}€
+                                                    <span class="h6"><br>au lieu de <del class="h5 color_brand_secondary">{{(item.data.originPrice /100)|number_format(2, '.', ',')}}€</del></span>
                                                 </p>
                                             </div>
                                         </div>
                                         <div class="col s12 m6 l4">
                                             <div class="card-content">
                                                 <p class="h6 color_brand_secondary">
-                                                    J'économise 28€
+                                                {% set economie = 'bar' %}
+                                                    J'économise {{(item.data.originPrice - item.data.price)/100}}€
                                                 </p>
                                                 <p class="h6">
                                                     + livraison gratuite
@@ -127,46 +99,7 @@
                                 </div>
                             </article>
                         </label>
-                        <label class="cure-radio">
-                            {{ form_widget(form.product.name[2]) }}
-                            {# <input name="order[cart][cart_products][0]" value="4" type="radio"> #}
-                            <article>
-                                <div class="card center-align">
-                                    <div class="row">
-                                        <div class="col s12 m12 l4">
-                                            <div class="image-content">
-                                                <img src="assets/images/nerf4.jpg" alt="1 Nerf© Elite Rapid Strike" class="responsive-img">
-                                            </div>
-                                        </div>
-                                        <div class="col s12 m6 l4">
-                                            <div class="card-content">
-                                                <p class="h6">
-                                                    1 Nerf© Elite Rapid Strike
-                                                </p>
-                                                <p class="h4">
-                                                    39,90€
-                                                    <span class="h6"><br>au lieu de <del class="h5 color_brand_secondary">59,90€</del></span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="col s12 m6 l4">
-                                            <div class="card-content">
-                                                <p class="h6 color_brand_secondary">
-                                                    J'économise 20€
-                                                </p>
-                                                <p class="h6">
-                                                    + livraison gratuite
-                                                </p>
-                                                <div class="picto-wrapper">
-                                                    <img src="assets/images/like-product.png" class="responsive-img" alt="Garantie satisfait ou remboursé">
-                                                    <p class="color_brand_primary">Satisfait<br>ou remboursé</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </article>
-                        </label>
+                        {% endfor %}
                         <h6 class="center-align">OUI ! Je veux profiter de cette offre exceptionnelle et créer une guerre au bureau.</h6>
                         <p class="center-align">Je bénéficie gratuitement de la garantie <b>100% satisfait ou remboursé</b><br>A tous moment durant ma cure, je peux retourner mes Nerfs et me faire rembourser immédiatement.</p>
                     </section>

@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Product;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -14,15 +15,22 @@ class ProductType extends AbstractType
     {
         $builder
 
-            ->add('name', ChoiceType::class, array(
-                'choices'  => [
-                    'product0' => '1',
-                    'product1' => '2',
-                    'product2' => '3',
-                ],
-                'expanded' => true,
-                'multiple' => false
-            ));
+            // ->add('name', ChoiceType::class, array(
+            //     'choices'  => [
+            //         'product0' => '1',
+            //         'product1' => '2',
+            //         'product2' => '3',
+            //     ],
+            //     'expanded' => true,
+            //     'multiple' => false
+            // ));
+            // ->add('name', EntityType::class, array(
+            //     'class' => Product::class,
+            //     'expanded' => true,
+            //     'multiple' => false,
+            //     'choice_label' => 'name',
+            //     'choice_value' => 'id',
+            // ));
         ;
     }
 

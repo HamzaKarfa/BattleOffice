@@ -14,56 +14,176 @@
         <span class="card-title color_product_primary center-align">Étape 2</span>
         <p class="h6 center-align">Remplissez ce formulaire</p>
         <div class="form-wrapper">
-            {{ form_widget(form.order) }}
 
+            <div class="input-field">
+                {{ form_widget(form.order.firstname) }}
+                <label>Prénom</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.firstname) }}
+                </div>
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.order.lastname) }}
+                <label>Nom</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.lastname) }}
+                </div>
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.order.adress) }}
+                <label>Adresse</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.adress) }}
+                </div>
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.order.adress_complement) }}
+                <label>Complément adr.</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.adress_complement) }}
+                </div>
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.order.city) }}
+                <label>Ville</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.city) }}
+                </div>
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.order.zip_code) }}
+                <label>Code postal</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.zip_code) }}
+                </div>
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.order.country) }}
+                <label>Pays</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.country) }}
+                </div>
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.order.phone_number) }}
+                <label>Téléphone</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.phone_number) }}
+                </div>
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.order.email) }}
+                <label>Email</label>
+                <div class="form-error">
+                    {{ form_errors(form.order.email) }}
+                </div>
+            </div>
+            {# <div class="input-field">
+                <div class="form-error"></div>
+                <input type="text">
+                <label>Confirmation email</label>
+            </div> #}
         </div>
     </div>
+</div>
     <ul class="collapsible">
         <li>
             <div class="collapsible-header"><i class="material-icons">markunread_mailbox</i>Adresse de livraison différente ?</div>
             <div class="collapsible-body">
-                     {{ form_widget(form.deliveryOrder, {'attr' : { "required" : false}}) }}
+
+                <div class="input-field">
+                     {{ form_widget(form.deliveryOrder.firstname, {'attr' : { "required" : false}}) }}
+                    <label>Prénom</label>
+                    <div class="form-error">
+                        {{ form_errors(form.deliveryOrder.firstname) }}
+                    </div>
+                </div>
+                <div class="input-field">
+                     {{ form_widget(form.deliveryOrder.lastname, {'attr' : { "required" : false}}) }}
+                    <label>Nom</label>
+                    <div class="form-error">
+                        {{ form_errors(form.deliveryOrder.lastname) }}
+                    </div>
+                </div>
+                <div class="input-field">
+                     {{ form_widget(form.deliveryOrder.adress, {'attr' : { "required" : false}}) }}
+                    <label>Adresse</label>
+                    <div class="form-error">
+                        {{ form_errors(form.deliveryOrder.adress) }}
+                    </div>
+                </div>
+                <div class="input-field">
+                     {{ form_widget(form.deliveryOrder.adress_complement, {'attr' : { "required" : false}}) }}
+                    <label>Complément adr.</label>
+                    <div class="form-error">
+                        {{ form_errors(form.deliveryOrder.adress_complement) }}
+                    </div>
+                </div>
+                <div class="input-field">
+                     {{ form_widget(form.deliveryOrder.city, {'attr' : { "required" : false}}) }}
+                    <label>Ville</label>
+                    <div class="form-error">
+                        {{ form_errors(form.deliveryOrder.city) }}
+                    </div>
+                </div>
+                <div class="input-field">
+                     {{ form_widget(form.deliveryOrder.zip_code, {'attr' : { "required" : false}}) }}
+                    <label>Code postal</label>
+                    <div class="form-error">
+                        {{ form_errors(form.deliveryOrder.zip_code) }}
+                    </div>
+                </div>
+                <div class="input-field">
+                     {{ form_widget(form.deliveryOrder.country, {'attr' : { "required" : false}}) }}
+                    <label>Pays</label>
+                    <div class="form-error">
+                        {{ form_errors(form.deliveryOrder.country) }}
+                    </div>
+                </div>
+                <div class="input-field">
+                     {{ form_widget(form.deliveryOrder.phone_number, {'attr' : { "required" : false}}) }}
+                    <label>Téléphone</label>
+                    <div class="form-error">
+                        {{ form_errors(form.deliveryOrder.phone_number) }}
+                    </div>
+                </div>
             </div>
         </li>
     </ul>
-</div>
-{# Etape 3 #}
-<div class="card step_3">
-    <div class="card-content">
-        <span class="card-title color_product_primary center-align">Étape 3</span>
-        <p class="h6 center-align">Choisissez un paiement</p>
-        <ul class="collapsible">
-            <li class="active">
-                <div class="collapsible-header"><i class="fas fa-credit-card"></i>Payer avec la Carte Bancaire</div>
-                <div class="collapsible-body card-form">
-                    <div class="row">
-                        <div class="center-align">
 
-                            
-                        
-                            <button class="btn" name="payment" value="stripe">{{ button_label|default('Save')  }}</button> 
 
-                            {# <button type="submit" name="order[payment_method]" value="lpmonetico" class="btn-large btn-block waves-effect waves-light">Continuer</button> #}
-                            <p>J'accepte les <a href="https://feelwellshop.com/fr/conditions-generales-de-ventes" target="_blank">conditions générales de vente</a></p>
-                            <img class="responsive-img monetico" src="assets/images/paiement-securise-stripe.jpeg" alt="Stripe protège vos achats">
+    {# Etape 3 #}
+    <div class="card step_3">
+        <div class="card-content">
+            <span class="card-title color_product_primary center-align">Étape 3</span>
+            <p class="h6 center-align">Choisissez un paiement</p>
+            <ul class="collapsible">
+                <li class="active">
+                    <div class="collapsible-header"><i class="fas fa-credit-card"></i>Payer avec la Carte Bancaire</div>
+                    <div class="collapsible-body card-form">
+                        <div class="row">
+                            <div class="center-align">
+                                <button class="btn" name="payment" value="stripe">{{ button_label|default('Save')  }}</button> 
+                                {# <button type="submit" name="order[payment_method]" value="lpmonetico" class="btn-large btn-block waves-effect waves-light">Continuer</button> #}
+                                <p>J'accepte les <a href="https://feelwellshop.com/fr/conditions-generales-de-ventes" target="_blank">conditions générales de vente</a></p>
+                                <img class="responsive-img monetico" src="assets/images/paiement-securise-stripe.jpeg" alt="Stripe protège vos achats">
+                            </div>
                         </div>
                     </div>
-                </div>
-            </li>
-            <li>
-                <div class="collapsible-header"><i class="fab fa-cc-paypal"></i>Payer avec Paypal</div>
-                <div class="collapsible-body">
-                    <div class="row">
-                        <div class="center-align">
-
-                            <button class="btn" name="payment" value="paypal">{{ button_label|default('Save') }}</button> 
-
-                            {# <button type="submit" name="order[payment_method]" value="lppaypal" class="btn-large btn-block waves-effect waves-light">Continuer sur PayPal</button> #}
-                            <p>J'accepte les <a href="https://feelwellshop.com/fr/conditions-generales-de-ventes" target="_blank">conditions générales de vente</a></p>
+                </li>
+                <li>
+                    <div class="collapsible-header"><i class="fab fa-cc-paypal"></i>Payer avec Paypal</div>
+                    <div class="collapsible-body">
+                        <div class="row">
+                            <div class="center-align">
+                                <button class="btn" name="payment" value="paypal">{{ button_label|default('Save') }}</button> 
+                                {# <button type="submit" name="order[payment_method]" value="lppaypal" class="btn-large btn-block waves-effect waves-light">Continuer sur PayPal</button> #}
+                                <p>J'accepte les <a href="https://feelwellshop.com/fr/conditions-generales-de-ventes" target="_blank">conditions générales de vente</a></p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </li>
-        </ul>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

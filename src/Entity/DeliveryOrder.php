@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\DeliveryOrderRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=DeliveryOrderRepository::class)

@@ -3,6 +3,7 @@
 namespace App\Entity;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=OrderRepository::class)
@@ -18,59 +19,89 @@ class Order
     private $id;
 
     /**
+     * @Assert\NotBlank(
+     *     message="Ne peut être vide."
+     * )
      * @ORM\Column(type="string", length=255)
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(
+     *     message="Ne peut être vide."
+     * )
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(
+     *     message="Ne peut être vide."
+     * )
      */
     private $adress;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)     
      */
     private $adress_complement;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(
+     *     message="Ne peut être vide."
+     * )
      */
     private $city;
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank(
+     *     message="Ne peut être vide."
+     * )
      */
     private $zip_code;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(
+     *     message="Ne peut être vide."
+     * )
      */
     private $country;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(
+     *     message="Ne peut être vide."
+     * )
      */
     private $phone_number;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Email(
+     *     message = "The email '{{ value }}' is not a valid email."
+     * )
      */
     private $email;
 
     /**
      * @ORM\OneToOne(targetEntity=DeliveryOrder::class, cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\All({
+     *        @Assert\Type(type="App\Entity\DeliveryOrder"),
+     * })
      */
     private $DeliveryOrder;
 
     /**
      * @ORM\ManyToOne(targetEntity=Product::class, inversedBy="orders")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\All({
+     *        @Assert\Type(type="App\Entity\Product"),
+     * })
      */
     private $product;
 

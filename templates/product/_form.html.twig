@@ -1,0 +1,15 @@
+{{ form_start(form) }}
+{{ dump(form  ) }}
+{# {{ dump(form.vars.choices  ) }} #}
+
+
+
+  {% for key, item in form.name.vars.choices %}
+    {{ dump(item.data.id) }}
+
+  {% endfor %}
+    {{ form_widget(form.name) }}
+
+
+    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_end(form) }}

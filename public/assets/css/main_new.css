@@ -78,5 +78,8 @@ article .promo{
     transition: all 350ms ease-out;
 }
 
+#form_order_product{
+    display: none;
+}
 
 

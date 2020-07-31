@@ -6,7 +6,7 @@ use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * @ORM\Entity(repositoryClass=ProductRepository::class)
  */
@@ -25,7 +25,7 @@ class Product
     private $name;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $price;
 
@@ -38,6 +38,31 @@ class Product
      * @ORM\OneToMany(targetEntity=Order::class, mappedBy="product")
      */
     private $orders;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $image;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $originPrice;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isPopulaire;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $numberOfProduct;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $numberOffrer;
 
     public function __construct()
     {
@@ -116,6 +141,66 @@ class Product
                 $order->setProduct(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    public function getOriginPrice(): ?string
+    {
+        return $this->originPrice;
+    }
+
+    public function setOriginPrice(string $originPrice): self
+    {
+        $this->originPrice = $originPrice;
+
+        return $this;
+    }
+
+    public function getIsPopulaire(): ?bool
+    {
+        return $this->isPopulaire;
+    }
+
+    public function setIsPopulaire(bool $isPopulaire): self
+    {
+        $this->isPopulaire = $isPopulaire;
+
+        return $this;
+    }
+
+    public function getNumberOfProduct(): ?int
+    {
+        return $this->numberOfProduct;
+    }
+
+    public function setNumberOfProduct(int $numberOfProduct): self
+    {
+        $this->numberOfProduct = $numberOfProduct;
+
+        return $this;
+    }
+
+    public function getNumberOffrer(): ?int
+    {
+        return $this->numberOffrer;
+    }
+
+    public function setNumberOffrer(int $numberOffrer): self
+    {
+        $this->numberOffrer = $numberOffrer;
 
         return $this;
     }

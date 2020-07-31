@@ -5,12 +5,10 @@ namespace App\Controller;
 use App\Entity\DeliveryOrder;
 use App\Entity\Order;
 use App\Entity\Payment;
-use App\Entity\Product;
 use App\Form\DeliveryOrderType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Form\OrderType;
 use App\Form\PaymentType;
-use App\Form\ProductType;
 use App\Repository\OrderRepository;
 use Stripe\Stripe;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -18,10 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpClient\HttpClient;
-
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 
 
 
@@ -35,13 +31,11 @@ class LandingPageController extends AbstractController
     public function index(Request $request, OrderRepository $orderRepository)
     {
         $allForm = [
-            'product',
             'order' => new Order(),
-            'deliveryOrder' => new DeliveryOrder(),
+            'deliveryOrder' => new DeliveryOrder()
         ];
         
         $form = $this->createFormBuilder($allForm)
-                     ->add('product', ProductType::class)
                      ->add('order', OrderType::class)
                      ->add('deliveryOrder', DeliveryOrderType::class)
                      ->getForm();
@@ -49,53 +43,49 @@ class LandingPageController extends AbstractController
         $form->handleRequest($request);
         
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $product = $this->getDoctrine()
-                            ->getRepository(Product::class)
-                            ->findOneBy(array( 'id' => intval($form['product']->getData()->getName())));
-
+            
             $allForm['order']->setDeliveryOrder($allForm['deliveryOrder']);
-            $allForm['order']->setProduct($product);
 
-            if ($allForm['deliveryOrder']->getFirstname() === null) {
+            if ($allForm['deliveryOrder']->getFirstname() === null && $allForm['deliveryOrder']->getAdress()=== null) {
                 $this->setDeliveryOrder($allForm['order'], $allForm['deliveryOrder']);
             }
-            
             $allForm['order']->setMethodPayment($request->request->get('payment'));
+            
             
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($allForm['order']);
+            $entityManager->persist($allForm['deliveryOrder']);
             $entityManager->flush();
             
-            $order =  $orderRepository->getOrder($allForm['order']->getEmail());
+            $order =  $allForm['order'];
 
             $array = [
                 'order' => [
-                    'id' => $order[0]->getProduct()->getId(),
-                    'product' => $order[0]->getProduct()->getName(),
-                    "payment_method"=> $order[0]->getMethodPayment(),
+                    'id' => $order->getId(),
+                    'product' => $order->getProduct()->getName(),
+                    "payment_method"=> $order->getMethodPayment(),
                     "status" => "WAITING",
                     "client" => [
-                        "firstname"=> $order[0]->getFirstname(),
-                        "lastname"=> $order[0]->getLastname(),
-                        "email" => $order[0]->getEmail(),
+                        "firstname"=> $order->getFirstname(),
+                        "lastname"=> $order->getLastname(),
+                        "email" => $order->getEmail(),
                     ],
                     "addresses" => [
                         "billing" => [
-                          "address_line1"=> $order[0]->getAdress(),
-                          "address_line2"=> $order[0]->getAdressComplement(),
-                          "city"=> $order[0]->getCity(),
-                          "zipcode"=> strval($order[0]->getZipCode()),
-                          "country"=> $order[0]->getCountry(),
-                          "phone"=> $order[0]->getPhoneNumber(),
+                          "address_line1"=> $order->getAdress(),
+                          "address_line2"=> $order->getAdressComplement(),
+                          "city"=> $order->getCity(),
+                          "zipcode"=> strval($order->getZipCode()),
+                          "country"=> $order->getCountry(),
+                          "phone"=> $order->getPhoneNumber(),
                         ],
                         "shipping" => [
-                            "address_line1"=> $order[0]->getDeliveryOrder()->getAdress(),
-                            "address_line2"=> $order[0]->getDeliveryOrder()->getAdressComplement(),
-                            "city"=> $order[0]->getDeliveryOrder()->getCity(),
-                            "zipcode"=>  strval ($order[0]->getDeliveryOrder()->getZipCode()),
-                            "country"=> $order[0]->getDeliveryOrder()->getCountry(),
-                            "phone"=> $order[0]->getDeliveryOrder()->getPhoneNumber(),
+                            "address_line1"=> $order->getDeliveryOrder()->getAdress(),
+                            "address_line2"=> $order->getDeliveryOrder()->getAdressComplement(),
+                            "city"=> $order->getDeliveryOrder()->getCity(),
+                            "zipcode"=>  strval ($order->getDeliveryOrder()->getZipCode()),
+                            "country"=> $order->getDeliveryOrder()->getCountry(),
+                            "phone"=> $order->getDeliveryOrder()->getPhoneNumber(),
                         ]
                     ]
                 ]
@@ -105,7 +95,7 @@ class LandingPageController extends AbstractController
                $test = $this->APICreateOrder($json);
 
             return $this->redirectToRoute('payment',[
-                'id' => $order[0]->getId(),
+                'id' => $order->getId(),
                 'order_id' => $test['order_id']
             ]);
         }
@@ -171,7 +161,7 @@ class LandingPageController extends AbstractController
         return $this->render('landing_page/payment.html.twig', [
                     'form' => $form->createView(),
                     'order' => $order,
-                    'amount' => floatval($order->getProduct()->getPrice())
+                    'amount' => number_format($order->getProduct()->getPrice()/100, 2, ',', '')
             ]);
     }
     public function stripeProcessing($order)
@@ -257,7 +247,7 @@ class LandingPageController extends AbstractController
          }
 
     }
- /**
+    /**
      * @Route("/email")
      */
     public function sendEmail(MailerInterface $mailer, Order $order )
@@ -271,20 +261,7 @@ class LandingPageController extends AbstractController
                         'name' => $order->getFirstname(),
                         'product' => $order->getProduct()
                     ]);
-                    // ->html('<p>See Twig integration for better HTML integration!</p>');
-        // $email = (new Email())
-        //     ->from('hello@example.com')
-        //     ->to('hamza.karfa@gmail.com')
-        //     //->cc('cc@example.com')
-        //     //->bcc('bcc@example.com')
-        //     //->replyTo('fabien@example.com')
-        //     ->priority(Email::PRIORITY_HIGH)
-        //     ->subject('Time for Symfony Mailer!')
-        //     ->text('Sending emails is fun again!')
-        //     ->html('<p>See Twig integration for better HTML integration!</p>');
 
         $mailer->send($email);
-
-        // ...
     }
 }
