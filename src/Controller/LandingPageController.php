@@ -52,10 +52,7 @@ class LandingPageController extends AbstractController
             $allForm['order']->setMethodPayment($request->request->get('payment'));
             
             
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($allForm['order']);
-            $entityManager->persist($allForm['deliveryOrder']);
-            $entityManager->flush();
+
             
             $order =  $allForm['order'];
 
@@ -92,11 +89,17 @@ class LandingPageController extends AbstractController
             ];
             $json = json_encode($array);
 
-               $test = $this->APICreateOrder($json);
+                $responseApi = $this->APICreateOrder($json);
+                $order->setIdOrderApi($responseApi['order_id']);
+
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->persist($order);
+                $entityManager->persist($order->getDeliveryOrder());
+                $entityManager->flush();
 
             return $this->redirectToRoute('payment',[
                 'id' => $order->getId(),
-                'order_id' => $test['order_id']
+                'order_id' => $responseApi['order_id']
             ]);
         }
         return $this->render('landing_page/index_new.html.twig', [

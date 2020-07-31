@@ -99,9 +99,6 @@ class Order
     /**
      * @ORM\ManyToOne(targetEntity=Product::class, inversedBy="orders")
      * @ORM\JoinColumn(nullable=false)
-     * @Assert\All({
-     *        @Assert\Type(type="App\Entity\Product"),
-     * })
      */
     private $product;
 
@@ -119,6 +116,11 @@ class Order
      * @ORM\OneToOne(targetEntity=Payment::class, mappedBy="client", cascade={"persist", "remove"})
      */
     private $payment;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $id_order_api;
 
     public function getId(): ?int
     {
@@ -294,6 +296,18 @@ class Order
         if ($payment->getClient() !== $this) {
             $payment->setClient($this);
         }
+
+        return $this;
+    }
+
+    public function getIdOrderApi(): ?int
+    {
+        return $this->id_order_api;
+    }
+
+    public function setIdOrderApi(?int $id_order_api): self
+    {
+        $this->id_order_api = $id_order_api;
 
         return $this;
     }
